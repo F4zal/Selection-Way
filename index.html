@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>SELECTIONWAY | By CodexStudys</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --cx-1:#00f5d4;
+  --cx-2:#7c3aed;
+  --cx-3:#f72585;
+  --cx-4:#4cc9f0;
+  --gold:#ffd60a;
+  --ink:#060612;
+  --ink2:#0d0d1f;
+  --ink3:#13132a;
+  --ink4:#1a1a35;
+  --surf:#1e1e3a;
+  --surf2:#252548;
+  --muted:#5e5e8a;
+  --muted2:#8888bb;
+  --white:#f0f0ff;
+  --border:rgba(255,255,255,0.06);
+  --border2:rgba(0,245,212,0.15);
+  --glow-teal:rgba(0,245,212,0.2);
+  --glow-purple:rgba(124,58,237,0.25);
+  --glow-pink:rgba(247,37,133,0.2);
+  --r:14px;
+}
+body{
+  font-family:'Space Grotesk',sans-serif;
+  background:var(--ink);
+  color:var(--white);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+a{text-decoration:none;color:inherit;}
+button{cursor:pointer;border:none;outline:none;font-family:inherit;}
+img{display:block;}
+input{font-family:inherit;outline:none;border:none;background:none;}
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--cx-1);border-radius:4px;}
+
+/* ── ANIMATIONS ── */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes shimmer{0%{background-position:-300% 0}100%{background-position:300% 0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes glow-pulse{0%,100%{box-shadow:0 0 20px var(--glow-teal)}50%{box-shadow:0 0 40px var(--glow-teal),0 0 80px rgba(0,245,212,0.1)}}
+@keyframes float{0%,100%{transform:translateY(0px)}50%{transform:translateY(-6px)}}
+@keyframes scan{0%{transform:translateY(-100%)}100%{transform:translateY(100vh)}}
+@keyframes orb-move{0%,100%{transform:translate(0,0)}33%{transform:translate(30px,-20px)}66%{transform:translate(-20px,15px)}}
+@keyframes grid-fade{0%,100%{opacity:0.03}50%{opacity:0.06}}
+@keyframes border-glow{0%,100%{border-color:rgba(0,245,212,0.15)}50%{border-color:rgba(0,245,212,0.4)}}
+@keyframes countUp{from{opacity:0;transform:scale(0.8)}to{opacity:1;transform:scale(1)}}
+@keyframes slide-chip{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+@keyframes card-appear{from{opacity:0;transform:translateY(24px) scale(0.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes ripple{0%{transform:scale(0);opacity:0.6}100%{transform:scale(4);opacity:0}}
+@keyframes scanner{0%{top:-2px}100%{top:calc(100% + 2px)}}
+@keyframes hexFloat{0%,100%{transform:rotate(0deg) translateY(0)}50%{transform:rotate(3deg) translateY(-8px)}}
+
+/* ── BG EFFECTS ── */
+.bg-orbs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);animation:orb-move 12s ease-in-out infinite;}
+.orb-1{width:500px;height:500px;top:-100px;right:-100px;background:radial-gradient(circle,rgba(124,58,237,0.18),transparent 70%);animation-delay:0s;}
+.orb-2{width:400px;height:400px;bottom:-80px;left:-80px;background:radial-gradient(circle,rgba(0,245,212,0.12),transparent 70%);animation-delay:-4s;}
+.orb-3{width:300px;height:300px;top:40%;left:30%;background:radial-gradient(circle,rgba(247,37,133,0.1),transparent 70%);animation-delay:-8s;}
+.bg-grid{
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(0,245,212,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,245,212,0.04) 1px,transparent 1px);
+  background-size:48px 48px;
+  animation:grid-fade 6s ease-in-out infinite;
+}
+.scan-line{
+  position:fixed;left:0;right:0;height:1px;z-index:0;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(0,245,212,0.3),transparent);
+  animation:scan 8s linear infinite;
+}
+
+/* ── PAGE SYSTEM ── */
+.page{display:none;position:relative;z-index:1;}
+.page.active{display:block;}
+
+/* ── HEADER ── */
+.header{
+  position:sticky;top:0;z-index:200;
+  background:rgba(6,6,18,0.8);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+}
+.header-inner{
+  display:flex;align-items:center;justify-content:space-between;
+  height:58px;padding:0 16px;max-width:1280px;margin:0 auto;
+}
+
+/* Brand */
+.brand{display:flex;align-items:center;gap:10px;}
+.brand-hex{
+  width:38px;height:38px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--cx-2),var(--cx-1));
+  clip-path:polygon(50% 0%,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 20px var(--glow-teal);
+  animation:glow-pulse 3s ease-in-out infinite;
+}
+.brand-cx{
+  font-size:1.15rem;font-weight:800;letter-spacing:-0.5px;
+  font-family:'JetBrains Mono',monospace;
+}
+.brand-cx span{color:var(--cx-1);}
+.brand-sub{
+  font-size:0.6rem;font-weight:700;letter-spacing:2px;
+  color:var(--muted2);text-transform:uppercase;margin-top:1px;
+  font-family:'JetBrains Mono',monospace;
+}
+.header-right{display:flex;align-items:center;gap:8px;}
+.icon-btn{
+  width:36px;height:36px;border-radius:10px;
+  background:var(--surf);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted2);transition:all 0.2s;
+}
+.icon-btn:hover{background:var(--glow-teal);color:var(--cx-1);border-color:var(--border2);}
+.search-row{
+  display:flex;align-items:center;gap:8px;width:100%;padding:0 16px;
+  height:58px;max-width:1280px;margin:0 auto;
+}
+.search-input{
+  flex:1;background:var(--surf);border:1px solid var(--border2);
+  border-radius:10px;padding:9px 16px;
+  font-size:0.875rem;color:var(--white);font-family:'Space Grotesk',sans-serif;
+  transition:border-color 0.2s;
+}
+.search-input:focus{border-color:var(--cx-1);box-shadow:0 0 0 3px rgba(0,245,212,0.08);}
+.search-input::placeholder{color:var(--muted);}
+.back-btn{
+  display:flex;align-items:center;gap:6px;
+  color:var(--cx-1);font-size:0.825rem;font-weight:700;
+  padding:7px 14px;border-radius:10px;
+  background:rgba(0,245,212,0.08);border:1px solid var(--border2);
+  transition:all 0.2s;font-family:'JetBrains Mono',monospace;
+}
+.back-btn:hover{background:rgba(0,245,212,0.15);}
+.batch-hdr-title{
+  font-size:0.75rem;font-weight:600;color:var(--muted2);
+  max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-family:'JetBrains Mono',monospace;
+}
+
+/* ── HERO ── */
+.hero{
+  position:relative;overflow:hidden;
+  background:linear-gradient(160deg,#060612 0%,#0a0520 40%,#0d0628 70%,#060612 100%);
+  padding:44px 20px 52px;
+}
+.hero-accent-line{
+  position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent 0%,var(--cx-1) 30%,var(--cx-2) 60%,var(--cx-3) 80%,transparent 100%);
+}
+.hero-content{max-width:1280px;margin:0 auto;position:relative;z-index:1;}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:7px;
+  background:rgba(0,245,212,0.08);border:1px solid rgba(0,245,212,0.25);
+  color:var(--cx-1);padding:5px 14px;border-radius:20px;
+  font-size:0.72rem;font-weight:700;letter-spacing:1.5px;
+  font-family:'JetBrains Mono',monospace;margin-bottom:16px;
+  animation:border-glow 3s ease-in-out infinite;
+}
+.tag-dot{width:6px;height:6px;border-radius:50%;background:var(--cx-1);animation:pulse 1.2s infinite;}
+.hero-title{
+  font-size:clamp(1.8rem,6vw,3.4rem);font-weight:800;
+  line-height:1.05;margin-bottom:12px;letter-spacing:-1.5px;
+  background:linear-gradient(135deg,#ffffff 0%,#c0c0ff 40%,var(--cx-1) 75%,var(--cx-4) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hero-title em{font-style:normal;color:var(--cx-3);-webkit-text-fill-color:var(--cx-3);}
+.hero-sub{font-size:0.92rem;color:var(--muted2);max-width:460px;line-height:1.65;}
+.hero-stats{
+  display:flex;gap:28px;margin-top:32px;padding-top:24px;
+  border-top:1px solid var(--border);
+}
+.hero-stat{}
+.stat-num{
+  font-size:1.6rem;font-weight:800;
+  font-family:'JetBrains Mono',monospace;
+  background:linear-gradient(135deg,var(--white),var(--cx-1));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  animation:countUp 0.6s ease both;
+}
+.stat-label{font-size:0.65rem;color:var(--muted);margin-top:2px;letter-spacing:1px;text-transform:uppercase;}
+
+/* ── CONTAINER ── */
+.container{max-width:1280px;margin:0 auto;padding:0 16px;}
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin:26px 0 16px;}
+.section-title{
+  display:flex;align-items:center;gap:10px;
+  font-size:1rem;font-weight:800;color:var(--white);
+}
+.s-bar{
+  width:3px;height:20px;border-radius:2px;
+  background:linear-gradient(180deg,var(--cx-1),var(--cx-2));
+  box-shadow:0 0 8px var(--cx-1);
+}
+.count-pill{
+  font-size:0.7rem;color:var(--cx-1);
+  background:rgba(0,245,212,0.08);border:1px solid rgba(0,245,212,0.2);
+  padding:3px 10px;border-radius:20px;font-family:'JetBrains Mono',monospace;
+}
+
+/* ── FILTER CHIPS ── */
+.chips{
+  display:flex;gap:7px;overflow-x:auto;
+  padding-bottom:4px;margin-bottom:20px;scrollbar-width:none;
+}
+.chips::-webkit-scrollbar{display:none;}
+.chip{
+  flex-shrink:0;padding:7px 16px;border-radius:10px;
+  font-size:0.78rem;font-weight:600;cursor:pointer;
+  background:var(--surf);border:1px solid var(--border);
+  color:var(--muted2);transition:all 0.2s;
+  animation:slide-chip 0.3s ease both;
+}
+.chip.active{
+  background:linear-gradient(135deg,rgba(0,245,212,0.15),rgba(124,58,237,0.15));
+  color:var(--cx-1);border-color:rgba(0,245,212,0.35);
+  box-shadow:0 0 12px rgba(0,245,212,0.15);
+}
+.chip:hover:not(.active){border-color:var(--border2);color:var(--white);}
+
+/* ── COURSE GRID ── */
+.course-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(265px,1fr));
+  gap:16px;padding-bottom:48px;
+}
+
+/* ── COURSE CARD ── */
+.course-card{
+  background:var(--surf);border-radius:var(--r);
+  border:1px solid var(--border);overflow:hidden;
+  cursor:pointer;display:flex;flex-direction:column;
+  transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  position:relative;
+  animation:card-appear 0.4s ease both;
+}
+.course-card::after{
+  content:'';position:absolute;inset:0;border-radius:var(--r);
+  background:linear-gradient(135deg,transparent 70%,rgba(0,245,212,0.04));
+  pointer-events:none;transition:opacity 0.3s;opacity:0;
+}
+.course-card:hover{
+  transform:translateY(-5px) scale(1.01);
+  box-shadow:0 16px 40px rgba(0,0,0,0.5),0 0 30px rgba(0,245,212,0.12);
+  border-color:rgba(0,245,212,0.2);
+}
+.course-card:hover::after{opacity:1;}
+.course-card:active{transform:scale(0.98);}
+
+/* Ripple */
+.course-card .ripple-container{position:absolute;inset:0;overflow:hidden;pointer-events:none;border-radius:var(--r);}
+.ripple-circle{position:absolute;border-radius:50%;background:rgba(0,245,212,0.15);animation:ripple 0.6s ease-out forwards;pointer-events:none;}
+
+/* Thumb */
+.card-thumb{position:relative;padding:10px 10px 0;}
+.card-img{
+  width:100%;aspect-ratio:16/9;object-fit:cover;
+  border-radius:10px;background:var(--surf2);
+  transition:transform 0.4s ease;
+}
+.course-card:hover .card-img{transform:scale(1.03);}
+.card-img-wrap{overflow:hidden;border-radius:10px;position:relative;}
+.card-overlay{
+  position:absolute;inset:0;border-radius:10px;
+  background:linear-gradient(to bottom,transparent 40%,rgba(6,6,18,0.8));
+  pointer-events:none;
+}
+.card-badges{
+  position:absolute;top:18px;left:18px;right:18px;
+  display:flex;justify-content:space-between;align-items:flex-start;
+  gap:4px;
+}
+
+/* ID tag */
+.card-id{
+  position:absolute;bottom:8px;left:8px;
+  font-size:0.6rem;font-weight:700;
+  font-family:'JetBrains Mono',monospace;
+  background:rgba(6,6,18,0.85);backdrop-filter:blur(8px);
+  color:var(--cx-1);padding:3px 7px;border-radius:6px;
+  border:1px solid rgba(0,245,212,0.2);letter-spacing:0.5px;
+}
+
+/* Badges */
+.badge{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 8px;border-radius:6px;
+  font-size:0.65rem;font-weight:700;
+  backdrop-filter:blur(8px);letter-spacing:0.3px;
+}
+.bdg-live{background:rgba(239,68,68,0.9);color:#fff;}
+.bdg-live .dot{width:5px;height:5px;border-radius:50%;background:#fff;animation:pulse 1.1s infinite;}
+.bdg-enrolled{background:rgba(0,245,212,0.15);color:var(--cx-1);border:1px solid rgba(0,245,212,0.3);}
+.bdg-inactive{background:rgba(94,94,138,0.8);color:#ddd;}
+.bdg-recorded{background:rgba(76,201,240,0.15);color:var(--cx-4);border:1px solid rgba(76,201,240,0.3);}
+.bdg-completed{background:rgba(94,94,138,0.8);color:#ddd;}
+.bdg-upcoming{background:rgba(255,214,10,0.15);color:var(--gold);border:1px solid rgba(255,214,10,0.3);}
+.bdg-purple{background:rgba(124,58,237,0.2);color:#c4b5fd;border:1px solid rgba(124,58,237,0.3);}
+.bdg-green{background:rgba(0,245,212,0.12);color:var(--cx-1);border:1px solid rgba(0,245,212,0.25);}
+
+/* Card body */
+.card-body{padding:14px 16px 16px;flex:1;display:flex;flex-direction:column;}
+.card-title{
+  font-size:0.9rem;font-weight:700;color:var(--white);
+  line-height:1.4;flex:1;
+}
+.card-desc{
+  font-size:0.72rem;color:var(--muted);margin-top:5px;
+  display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;
+}
+.card-price{display:flex;align-items:baseline;gap:6px;margin-top:10px;}
+.price-now{
+  font-size:1.1rem;font-weight:800;
+  font-family:'JetBrains Mono',monospace;
+  background:linear-gradient(135deg,#fff,var(--cx-1));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.price-was{font-size:0.75rem;color:var(--muted);text-decoration:line-through;font-family:'JetBrains Mono',monospace;}
+.price-disc{
+  font-size:0.65rem;font-weight:700;color:var(--cx-1);
+  background:rgba(0,245,212,0.1);border:1px solid rgba(0,245,212,0.2);
+  padding:2px 6px;border-radius:6px;font-family:'JetBrains Mono',monospace;
+}
+.card-meta{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;}
+.meta-tag{
+  display:inline-flex;align-items:center;gap:3px;
+  font-size:0.64rem;color:var(--muted2);
+  background:var(--ink3);border:1px solid var(--border);
+  padding:2px 7px;border-radius:5px;
+}
+.card-div{height:1px;background:var(--border);margin:12px 0 0;}
+.card-actions{display:flex;gap:8px;margin-top:12px;}
+
+/* ── BUTTONS ── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:9px 16px;border-radius:10px;font-size:0.8rem;font-weight:700;
+  transition:all 0.2s;flex:1;position:relative;overflow:hidden;
+  font-family:'Space Grotesk',sans-serif;
+}
+.btn-cx{
+  background:linear-gradient(135deg,var(--cx-2),var(--cx-1));
+  color:#000;box-shadow:0 2px 16px var(--glow-teal);
+  letter-spacing:0.3px;
+}
+.btn-cx:hover{box-shadow:0 4px 28px var(--glow-teal),0 0 0 1px rgba(0,245,212,0.4);filter:brightness(1.1);}
+.btn-outline{
+  background:rgba(0,245,212,0.06);color:var(--cx-1);
+  border:1px solid rgba(0,245,212,0.25);
+}
+.btn-outline:hover{background:rgba(0,245,212,0.12);}
+.btn-danger{
+  background:rgba(247,37,133,0.1);color:var(--cx-3);
+  border:1px solid rgba(247,37,133,0.25);
+}
+.btn-danger:hover{background:rgba(247,37,133,0.18);}
+.btn-sm{padding:5px 10px;font-size:0.73rem;flex:unset;}
+.btn-ghost{background:transparent;color:var(--muted2);padding:6px 10px;font-size:0.8rem;flex:unset;}
+.btn-ghost:hover{background:var(--surf);color:var(--white);}
+.btn-live{
+  background:linear-gradient(135deg,#ef4444,#dc2626);
+  color:white;box-shadow:0 2px 14px rgba(239,68,68,0.35);
+}
+.btn-live:hover{box-shadow:0 4px 24px rgba(239,68,68,0.5);}
+.btn-disabled{
+  background:var(--surf);color:var(--muted);
+  cursor:not-allowed;border:1px solid var(--border);
+}
+.btn-icon{width:32px;height:32px;padding:0;flex:0 0 32px;border-radius:8px;background:var(--surf);color:var(--muted2);border:1px solid var(--border);}
+.btn-icon:hover{background:var(--glow-teal);color:var(--cx-1);border-color:var(--border2);}
+
+/* ── LOADER ── */
+.loader-wrap{display:flex;justify-content:center;align-items:center;padding:60px 0;}
+.cx-loader{
+  width:36px;height:36px;border-radius:50%;
+  border:2px solid var(--border);border-top-color:var(--cx-1);
+  animation:spin 0.8s linear infinite;
+  box-shadow:0 0 12px var(--glow-teal);
+}
+
+/* ── EMPTY / ERROR ── */
+.empty-state,.error-state{
+  display:flex;flex-direction:column;align-items:center;
+  padding:60px 20px;gap:12px;text-align:center;
+}
+.empty-icon{font-size:2.8rem;opacity:0.4;animation:float 3s ease-in-out infinite;}
+.error-state p{color:var(--cx-3);font-size:0.88rem;}
+.empty-state h3{font-size:0.95rem;font-weight:800;color:var(--white);}
+.empty-state p{color:var(--muted2);font-size:0.82rem;}
+
+/* ── BATCH DETAIL HERO ── */
+.batch-hero{
+  position:relative;overflow:hidden;
+  background:linear-gradient(160deg,var(--ink) 0%,var(--ink2) 50%,var(--ink) 100%);
+  padding:24px 20px 28px;
+}
+.batch-hero::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(0,245,212,0.05) 0%,transparent 50%,rgba(124,58,237,0.05) 100%);
+  pointer-events:none;
+}
+.batch-hero-img{
+  width:100%;max-height:220px;object-fit:cover;
+  border-radius:14px;margin-bottom:18px;
+  border:1px solid var(--border2);
+  box-shadow:0 0 40px rgba(0,245,212,0.1);
+}
+.batch-hero-title{
+  font-size:1.3rem;font-weight:800;color:var(--white);
+  line-height:1.25;margin-bottom:12px;letter-spacing:-0.5px;
+}
+.batch-hero-price{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:4px;}
+.batch-price-big{
+  font-size:1.5rem;font-weight:800;font-family:'JetBrains Mono',monospace;
+  background:linear-gradient(135deg,#fff,var(--cx-1));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.batch-price-orig{font-size:0.9rem;color:var(--muted);text-decoration:line-through;font-family:'JetBrains Mono',monospace;}
+
+/* ── TABS ── */
+.tabs-nav{
+  display:flex;overflow-x:auto;scrollbar-width:none;
+  background:var(--ink2);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:58px;z-index:150;
+}
+.tabs-nav::-webkit-scrollbar{display:none;}
+.tab-btn{
+  flex:1;min-width:80px;padding:12px 8px;font-size:0.76rem;font-weight:700;
+  color:var(--muted2);border-bottom:2px solid transparent;
+  transition:all 0.2s;background:transparent;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  white-space:nowrap;font-family:'Space Grotesk',sans-serif;
+}
+.tab-btn.active{color:var(--cx-1);border-bottom-color:var(--cx-1);}
+.tab-btn:hover:not(.active){color:var(--white);}
+.tab-content{}
+.tab-panel{display:none;padding:20px 0;}
+.tab-panel.active{display:block;animation:fadeUp 0.3s ease;}
+
+/* ── OVERVIEW ── */
+.ov-section{margin-bottom:26px;}
+.ov-h{
+  display:flex;align-items:center;gap:8px;
+  font-size:0.9rem;font-weight:800;color:var(--white);margin-bottom:12px;
+}
+.ov-h-icon{
+  width:26px;height:26px;border-radius:7px;flex-shrink:0;
+  background:rgba(0,245,212,0.1);border:1px solid rgba(0,245,212,0.2);
+  display:flex;align-items:center;justify-content:center;
+}
+.ov-list{list-style:none;display:flex;flex-direction:column;gap:6px;}
+.ov-list li{
+  font-size:0.82rem;color:var(--muted2);padding:10px 14px;
+  background:var(--surf);border:1px solid var(--border);
+  border-radius:10px;display:flex;align-items:flex-start;gap:10px;
+  transition:border-color 0.2s;
+}
+.ov-list li:hover{border-color:var(--border2);}
+.li-dot{
+  width:16px;height:16px;border-radius:4px;flex-shrink:0;
+  background:rgba(0,245,212,0.1);border:1px solid rgba(0,245,212,0.2);
+  display:flex;align-items:center;justify-content:center;margin-top:1px;
+}
+
+/* ── FACULTY ── */
+.faculty-card{
+  background:var(--surf);border-radius:14px;
+  border:1px solid var(--border);padding:18px;
+  display:flex;gap:14px;align-items:flex-start;
+  transition:border-color 0.2s;
+}
+.faculty-card:hover{border-color:var(--border2);}
+.faculty-img{
+  width:68px;height:68px;border-radius:12px;object-fit:cover;
+  border:2px solid rgba(0,245,212,0.25);flex-shrink:0;
+}
+.faculty-name{font-size:0.95rem;font-weight:800;color:var(--white);}
+.faculty-role{font-size:0.72rem;color:var(--muted2);margin-top:2px;}
+.faculty-badge{
+  font-size:0.7rem;color:var(--cx-1);margin-top:5px;font-weight:700;
+  display:inline-flex;align-items:center;gap:4px;
+  background:rgba(0,245,212,0.08);border:1px solid rgba(0,245,212,0.2);
+  padding:2px 8px;border-radius:6px;font-family:'JetBrains Mono',monospace;
+}
+.faculty-bio{font-size:0.78rem;color:var(--muted2);margin-top:8px;line-height:1.6;}
+
+/* ── FAQ ── */
+.faq-item{
+  background:var(--surf);border-radius:12px;
+  border:1px solid var(--border);margin-bottom:7px;overflow:hidden;
+  transition:border-color 0.2s;
+}
+.faq-item:hover{border-color:var(--border2);}
+.faq-q{
+  width:100%;padding:13px 16px;text-align:left;
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:0.83rem;font-weight:600;color:var(--white);
+  background:transparent;gap:10px;cursor:pointer;
+}
+.faq-q svg{flex-shrink:0;transition:transform 0.25s;color:var(--muted2);}
+.faq-q.open{color:var(--cx-1);}
+.faq-q.open svg{transform:rotate(180deg);color:var(--cx-1);}
+.faq-a{display:none;padding:0 16px 13px;font-size:0.8rem;color:var(--muted2);line-height:1.7;}
+.faq-a.open{display:block;animation:fadeIn 0.2s ease;}
+
+/* ── TIMETABLE ── */
+.tt-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 14px;background:var(--surf);
+  border:1px solid var(--border);border-radius:10px;margin-bottom:7px;
+  transition:border-color 0.2s;
+}
+.tt-row:hover{border-color:var(--border2);}
+.tt-topic{font-size:0.83rem;font-weight:600;color:var(--white);}
+.tt-time{
+  font-size:0.72rem;color:var(--cx-1);font-weight:700;
+  background:rgba(0,245,212,0.08);border:1px solid rgba(0,245,212,0.2);
+  padding:3px 8px;border-radius:6px;font-family:'JetBrains Mono',monospace;
+}
+
+/* ── TOPICS ── */
+.topic-card{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 16px;background:var(--surf);
+  border:1px solid var(--border);border-radius:12px;margin-bottom:8px;
+  cursor:pointer;transition:all 0.2s;
+}
+.topic-card:hover{border-color:var(--border2);background:var(--surf2);transform:translateX(3px);}
+.topic-icon{
+  width:40px;height:40px;border-radius:10px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.topic-icon-video{background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.25);}
+.topic-icon-notes{background:rgba(0,245,212,0.1);border:1px solid rgba(0,245,212,0.2);}
+.topic-name{font-size:0.875rem;font-weight:700;color:var(--white);}
+.topic-sub{font-size:0.72rem;color:var(--muted2);margin-top:2px;font-family:'JetBrains Mono',monospace;}
+.topic-arrow{margin-left:auto;color:var(--muted);flex-shrink:0;}
+
+/* ── CLASS CARD ── */
+.class-card{
+  background:var(--surf);border-radius:12px;
+  border:1px solid var(--border);overflow:hidden;
+  margin-bottom:10px;transition:border-color 0.2s;
+}
+.class-card:hover{border-color:var(--border2);}
+.class-card-head{
+  padding:13px 16px;background:var(--surf2);
+  display:flex;align-items:flex-start;gap:10px;
+}
+.class-icon{
+  width:40px;height:40px;border-radius:10px;
+  background:rgba(0,245,212,0.08);border:1px solid rgba(0,245,212,0.15);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.class-title{font-size:0.85rem;font-weight:700;color:var(--white);line-height:1.3;}
+.class-teacher{font-size:0.7rem;color:var(--muted2);margin-top:2px;}
+.class-time{
+  display:flex;align-items:center;gap:4px;
+  font-size:0.67rem;color:var(--muted);margin-top:2px;
+  font-family:'JetBrains Mono',monospace;
+}
+.class-tabs{display:flex;background:var(--surf);border-bottom:1px solid var(--border);}
+.class-tab-btn{
+  flex:1;padding:8px 0;font-size:0.74rem;font-weight:700;
+  color:var(--muted2);border-bottom:2px solid transparent;
+  transition:all 0.15s;background:transparent;
+}
+.class-tab-btn.active{color:var(--cx-1);border-bottom-color:var(--cx-1);}
+.class-tab-btn:disabled{opacity:0.3;cursor:not-allowed;}
+.class-tab-panel{display:none;padding:12px 16px;}
+.class-tab-panel.active{display:block;}
+
+/* ── PDF ROW ── */
+.pdf-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 12px;background:var(--surf2);
+  border:1px solid var(--border);border-radius:10px;margin-bottom:6px;gap:10px;
+  transition:border-color 0.2s;
+}
+.pdf-row:hover{border-color:var(--border2);}
+.pdf-row-info{display:flex;align-items:center;gap:8px;flex:1;min-width:0;}
+.pdf-row-name{
+  font-size:0.8rem;font-weight:600;color:var(--white);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+
+/* ── LIVE CLASS CARD ── */
+.live-class-card{
+  background:var(--surf);border-radius:12px;
+  border:1px solid var(--border);overflow:hidden;margin-bottom:10px;
+  transition:border-color 0.2s;
+}
+.live-class-card:hover{border-color:var(--border2);}
+.live-class-head{
+  padding:13px 16px;background:var(--surf2);
+  display:flex;align-items:flex-start;gap:10px;
+}
+
+/* ── QUALITY MODAL ── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;z-index:300;
+  background:rgba(6,6,18,0.88);backdrop-filter:blur(12px);
+  align-items:flex-end;justify-content:center;
+}
+.modal-overlay.open{display:flex;}
+.modal-sheet{
+  background:var(--ink3);width:100%;max-width:440px;
+  border-radius:20px 20px 0 0;padding:24px;
+  border:1px solid var(--border2);border-bottom:none;
+  animation:fadeUp 0.25s ease;
+  box-shadow:0 -8px 40px rgba(0,245,212,0.08);
+}
+.modal-handle{
+  width:40px;height:3px;border-radius:2px;
+  background:var(--border2);margin:0 auto 18px;
+}
+.modal-title{
+  font-size:0.95rem;font-weight:800;color:var(--white);
+  margin-bottom:16px;font-family:'JetBrains Mono',monospace;
+}
+.quality-btn{
+  display:flex;align-items:center;justify-content:space-between;
+  width:100%;padding:13px 16px;border-radius:10px;
+  background:var(--surf);border:1px solid var(--border);
+  margin-bottom:8px;font-size:0.875rem;font-weight:700;color:var(--white);
+  transition:all 0.2s;
+}
+.quality-btn:hover{background:var(--surf2);border-color:var(--border2);}
+.quality-size{font-size:0.72rem;color:var(--muted2);font-family:'JetBrains Mono',monospace;}
+
+/* ── FOOTER ── */
+.cx-footer{
+  text-align:center;padding:22px 16px 32px;
+  border-top:1px solid var(--border);margin-top:8px;
+}
+.cx-footer-text{font-size:0.7rem;color:var(--muted);letter-spacing:0.5px;}
+.cx-footer-name{
+  font-weight:800;
+  background:linear-gradient(90deg,var(--cx-2),var(--cx-1));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  font-family:'JetBrains Mono',monospace;
+}
+
+/* ── INFO BOX ── */
+.info-box{
+  background:rgba(0,245,212,0.05);border-left:3px solid var(--cx-1);
+  border-radius:0 10px 10px 0;padding:12px 16px;margin-bottom:16px;
+  border:1px solid rgba(0,245,212,0.12);border-left:3px solid var(--cx-1);
+}
+.info-box p{font-size:0.8rem;color:var(--cx-1);}
+
+/* ── RESPONSIVE ── */
+@media(max-width:480px){
+  .hero{padding:32px 14px 40px;}
+  .course-grid{grid-template-columns:1fr 1fr;gap:10px;}
+  .card-body{padding:10px 12px 12px;}
+  .card-title{font-size:0.8rem;}
+  .price-now{font-size:0.9rem;}
+  .btn{padding:8px 10px;font-size:0.74rem;}
+  .hero-stats{gap:18px;}
+  .hero-title{letter-spacing:-1px;}
+}
+@media(max-width:360px){
+  .course-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- BG FX -->
+<div class="bg-orbs">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+<div class="bg-grid"></div>
+<div class="scan-line"></div>
+
+<!-- ══ HOME PAGE ══ -->
+<div id="page-home" class="page active">
+  <header class="header" id="home-header">
+    <div class="header-inner" id="home-header-main">
+      <div class="brand">
+        <div class="brand-hex">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#000" stroke-width="2.5">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-cx">Selection<span>Way</span></div>
+          <div class="brand-sub">By CodexStudys</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="icon-btn" onclick="toggleSearch()" title="Search">
+          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        </button>
+      </div>
+    </div>
+    <div id="home-search-row" style="display:none;">
+      <div class="search-row">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="var(--muted2)" stroke-width="2" style="flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input id="search-input" class="search-input" type="search" placeholder="Search batches…" oninput="filterCourses()" autofocus/>
+        <button class="icon-btn" onclick="closeSearch()">
+          <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-accent-line"></div>
+    <div class="hero-content">
+      <div class="hero-tag">
+        <div class="tag-dot"></div>
+        LIVE &amp; RECORDED · PREMIUM
+      </div>
+      <h1 class="hero-title">Study <em>Smarter.</em><br>Crack <em>Every</em> Exam.</h1>
+      <p class="hero-sub">Expert-led batches for SSC, Banking, Railway &amp; more — live classes, recordings, notes. All in one place.</p>
+      <div class="hero-stats" id="hero-stats" style="display:none;">
+        <div class="hero-stat">
+          <div class="stat-num" id="stat-batches">—</div>
+          <div class="stat-label">Enrolled</div>
+        </div>
+        <div class="hero-stat">
+          <div class="stat-num" id="stat-live">—</div>
+          <div class="stat-label">Live Now</div>
+        </div>
+        <div class="hero-stat">
+          <div class="stat-num" id="stat-enrolled">—</div>
+          <div class="stat-label">Enrolled</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="container">
+    <div class="section-hdr">
+      <div class="section-title">
+        <div class="s-bar"></div>
+        Our Batches
+      </div>
+      <span class="count-pill" id="courses-count"></span>
+    </div>
+
+    <div class="chips" id="filter-chips">
+      <button class="chip active" onclick="setFilter('all',this)">All Batches</button>
+      <button class="chip" onclick="setFilter('live',this)">🔴 Live</button>
+      <button class="chip" onclick="setFilter('recorded',this)">📹 Recorded</button>
+      <button class="chip" onclick="setFilter('enrolled',this)">✅ Enrolled</button>
+    </div>
+
+    <div id="courses-grid" class="course-grid"></div>
+  </div>
+
+  <div class="cx-footer">
+    <div class="cx-footer-text">© 2026 SelectionWay · Designed &amp; Developed by <span class="cx-footer-name">CodexStudys</span></div>
+  </div>
+</div>
+
+<!-- ══ BATCH DETAIL PAGE ══ -->
+<div id="page-batch" class="page">
+  <header class="header">
+    <div class="header-inner">
+      <button class="back-btn" onclick="goHome()">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
+        Batches
+      </button>
+      <span id="batch-hdr-title" class="batch-hdr-title"></span>
+    </div>
+  </header>
+
+  <div class="batch-hero" id="batch-hero">
+    <div class="container" id="batch-hero-inner">
+      <div class="loader-wrap"><div class="cx-loader"></div></div>
+    </div>
+  </div>
+
+  <nav class="tabs-nav" id="batch-tabs" style="display:none;">
+    <button class="tab-btn active" onclick="switchTab('overview',this)">
+      <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      Overview
+    </button>
+    <button class="tab-btn" onclick="switchTab('videos',this)">
+      <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+      Videos
+    </button>
+    <button class="tab-btn" onclick="switchTab('notes',this)">
+      <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Notes
+    </button>
+    <button class="tab-btn" onclick="switchTab('timetable',this)">
+      <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Live &amp; Schedule
+    </button>
+  </nav>
+
+  <div class="container" id="batch-tab-content" style="display:none;">
+    <div class="tab-content">
+      <div id="tab-overview" class="tab-panel active"></div>
+      <div id="tab-videos" class="tab-panel"></div>
+      <div id="tab-notes" class="tab-panel"></div>
+      <div id="tab-timetable" class="tab-panel"></div>
+    </div>
+  </div>
+
+  <div class="cx-footer">
+    <div class="cx-footer-text">© 2026 SelectionWay · Designed &amp; Developed by <span class="cx-footer-name">CodexStudys</span></div>
+  </div>
+</div>
+
+<!-- ══ QUALITY MODAL ══ -->
+<div class="modal-overlay" id="quality-modal" onclick="closeQualityModal(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">// SELECT_QUALITY</div>
+    <div id="quality-options"></div>
+    <button class="btn btn-outline" style="width:100%;margin-top:6px;" onclick="closeQualityModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:400;padding:11px 22px;border-radius:12px;font-size:0.82rem;font-weight:700;color:#000;pointer-events:none;backdrop-filter:blur(8px);transition:opacity 0.3s,transform 0.3s;white-space:nowrap;font-family:'Space Grotesk',sans-serif;"></div>
+
+<script>
+// ── STATE ──
+const SW_KEY='cxEnrolled_v2';
+let allCourses=[];
+let currentFilter='all';
+let currentBatchId=null;
+let batchData=null;
+let videoTopicSelected=null;
+let notesTopicSelected=null;
+let currentQualityList=[];
+let topicsCache={};
+
+function getEnrolled(){try{const v=JSON.parse(localStorage.getItem(SW_KEY)||'[]');return Array.isArray(v)?v:[];}catch{return[];}}
+function saveEnrolled(ids){localStorage.setItem(SW_KEY,JSON.stringify(ids));}
+
+// ── ROUTING ──
+function parseHash(){
+  const h=location.hash.slice(1);
+  if(!h||h==='/')return{page:'home',id:null};
+  const m=h.match(/^\/batch\/(.+)/);
+  return m?{page:'batch',id:m[1]}:{page:'home',id:null};
+}
+function navigate(page,id=null){
+  if(page==='batch')location.hash='/batch/'+id;
+  else location.hash='/';
+}
+function goHome(){navigate('home');}
+window.addEventListener('hashchange',handleRoute);
+window.addEventListener('DOMContentLoaded',()=>{initHome();handleRoute();});
+
+function handleRoute(){
+  const{page,id}=parseHash();
+  document.getElementById('page-home').classList.toggle('active',page==='home');
+  document.getElementById('page-batch').classList.toggle('active',page==='batch');
+  if(page==='batch'&&id)loadBatch(id);
+}
+
+// ── HOME ──
+function toggleSearch(){
+  document.getElementById('home-header-main').style.display='none';
+  document.getElementById('home-search-row').style.display='block';
+  setTimeout(()=>document.getElementById('search-input').focus(),50);
+}
+function closeSearch(){
+  document.getElementById('home-header-main').style.display='flex';
+  document.getElementById('home-search-row').style.display='none';
+  document.getElementById('search-input').value='';
+  filterCourses();
+}
+
+async function initHome(){
+  renderGrid('<div class="loader-wrap"><div class="cx-loader"></div></div>');
+  try{
+    const res=await fetch('https://backend.multistreaming.site/api/courses/');
+    if(!res.ok)throw new Error('API error '+res.status);
+    const j=await res.json();
+    if(j.state!==200)throw new Error(j.message||'Error loading');
+    allCourses=(j.data||[]).sort((a,b)=>(a.priority??999)-(b.priority??999));
+    updateStats();
+    filterCourses();
+  }catch(e){
+    renderGrid(`<div class="error-state">
+      <svg width="44" height="44" fill="none" viewBox="0 0 24 24" stroke="var(--cx-3)" stroke-width="1.5">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      <h3 style="color:var(--white);font-size:0.95rem;">Failed to load</h3>
+      <p>${esc(e.message)}</p>
+    </div>`);
+  }
+}
+
+function updateStats(){
+  const enrolled=getEnrolled();
+  const live=allCourses.filter(c=>c.isLive&&c.status==='active').length;
+  document.getElementById('stat-batches').textContent=allCourses.length;
+  document.getElementById('stat-live').textContent=live;
+  document.getElementById('stat-enrolled').textContent=enrolled.length;
+  document.getElementById('hero-stats').style.display='flex';
+}
+
+function setFilter(f,btn){
+  currentFilter=f;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  filterCourses();
+}
+
+function filterCourses(){
+  const q=(document.getElementById('search-input').value||'').toLowerCase();
+  const enrolled=getEnrolled();
+  let list=allCourses;
+  if(q)list=list.filter(c=>c.title.toLowerCase().includes(q)||((c.short_description||'').toLowerCase().includes(q)));
+  if(currentFilter==='live')list=list.filter(c=>c.isLive&&c.status==='active');
+  else if(currentFilter==='recorded')list=list.filter(c=>c.isRecorded);
+  else if(currentFilter==='enrolled')list=list.filter(c=>enrolled.includes(c.id));
+  document.getElementById('courses-count').textContent=list.length+' batch'+(list.length!==1?'es':'');
+  if(!list.length){
+    renderGrid('<div class="empty-state"><div class="empty-icon">🔍</div><h3>No batches found</h3><p>Try a different filter or search term.</p></div>');
+    return;
+  }
+  renderGrid(list.map((c,i)=>renderCard(c,i)).join(''));
+}
+
+function getThumb(c){return c.banner||c.bannerSquare||'https://placehold.co/400x225/0d0d1f/00f5d4?text=SW';}
+
+function renderCard(c,i){
+  const enrolled=getEnrolled().includes(c.id);
+  const disc=c.price&&c.price>c.discountPrice?Math.round((1-c.discountPrice/c.price)*100):0;
+  const delay=(i%8)*0.05;
+
+  let leftBadge='';
+  if(c.status==='inactive')leftBadge='<span class="badge bdg-inactive">Inactive</span>';
+  else if(c.isLive)leftBadge='<span class="badge bdg-live"><span class="dot"></span>Live</span>';
+  else if(c.isRecorded)leftBadge='<span class="badge bdg-recorded">📹 Rec</span>';
+
+  const rightBadge=enrolled?'<span class="badge bdg-enrolled">✓ Enrolled</span>':'';
+  const enrollBtn=enrolled
+    ?`<button class="btn btn-danger" onclick="event.stopPropagation();unenroll('${c.id}')">
+        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>Unenroll</button>`
+    :`<button class="btn btn-outline" onclick="event.stopPropagation();enroll('${c.id}')">
+        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Enroll</button>`;
+
+  const discTag=disc>0?`<span class="price-disc">${disc}% off</span>`:'';
+  const origTag=c.price&&c.price>c.discountPrice?`<span class="price-was">₹${c.price}</span>`:'';
+  const metaLive=c.isLive?'<span class="meta-tag">🔴 Live</span>':'';
+  const metaRec=c.isRecorded?'<span class="meta-tag">📹 Rec</span>':'';
+  const metaVal=c.validity?`<span class="meta-tag">⏳ ${c.validity}</span>`:'';
+
+  const shortId=c.id?c.id.toString().slice(-8).toUpperCase():'';
+
+  return`
+  <div class="course-card" style="animation-delay:${delay}s;" onclick="addRipple(event,this);setTimeout(()=>navigate('batch','${c.id}'),120)">
+    <div class="ripple-container"></div>
+    <div class="card-thumb">
+      <div class="card-img-wrap">
+        <img class="card-img" src="${getThumb(c)}" alt="${esc(c.title)}" loading="lazy"
+          onerror="this.src='https://placehold.co/400x225/0d0d1f/00f5d4?text=SW'"/>
+        <div class="card-overlay"></div>
+        <div class="card-badges">${leftBadge}${rightBadge}</div>
+        ${shortId?`<div class="card-id">ID: ${shortId}</div>`:''}
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">${esc(c.title)}</div>
+      ${c.short_description?`<div class="card-desc">${esc(c.short_description)}</div>`:''}
+      <div class="card-price">
+        <span class="price-now">₹${c.discountPrice}</span>
+        ${origTag}${discTag}
+      </div>
+      <div class="card-meta">${metaLive}${metaRec}${metaVal}</div>
+      <div class="card-div"></div>
+      <div class="card-actions">
+        <button class="btn btn-cx" onclick="event.stopPropagation();navigate('batch','${c.id}')">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Access Batch
+        </button>
+        ${enrollBtn}
+      </div>
+    </div>
+  </div>`;
+}
+
+function addRipple(e,card){
+  const r=card.querySelector('.ripple-container');if(!r)return;
+  const rect=card.getBoundingClientRect();
+  const x=e.clientX-rect.left,y=e.clientY-rect.top;
+  const el=document.createElement('div');
+  el.className='ripple-circle';
+  el.style.cssText=`left:${x}px;top:${y}px;width:20px;height:20px;margin:-10px 0 0 -10px;`;
+  r.appendChild(el);setTimeout(()=>el.remove(),700);
+}
+
+function renderGrid(html){document.getElementById('courses-grid').innerHTML=html;}
+
+function enroll(id){
+  saveEnrolled([...getEnrolled(),id]);
+  const c=allCourses.find(x=>x.id===id);
+  showToast('🎉 Enrolled in '+(c?c.title:'batch'),'success');
+  filterCourses();updateStats();
+}
+function unenroll(id){
+  saveEnrolled(getEnrolled().filter(x=>x!==id));
+  const c=allCourses.find(x=>x.id===id);
+  showToast('Unenrolled from '+(c?c.title:'batch'),'error');
+  filterCourses();updateStats();
+}
+
+// ── BATCH DETAIL ──
+async function loadBatch(id){
+  if(currentBatchId===id&&batchData)return;
+  currentBatchId=id;batchData=null;
+  videoTopicSelected=null;notesTopicSelected=null;
+  document.getElementById('batch-tabs').style.display='none';
+  document.getElementById('batch-tab-content').style.display='none';
+  document.getElementById('batch-hdr-title').textContent='';
+  document.getElementById('batch-hero-inner').innerHTML='<div class="loader-wrap"><div class="cx-loader"></div></div>';
+  try{
+    const res=await fetch(`https://backend.multistreaming.site/api/courses/${id}`);
+    if(!res.ok)throw new Error('Failed '+res.status);
+    const j=await res.json();
+    if(j.state!==200)throw new Error(j.message||'Error');
+    batchData=j.data;
+    renderBatchHero(batchData,id);
+    renderBatchOverview(batchData);
+    document.getElementById('tab-videos').innerHTML='<div id="videos-inner"></div>';
+    document.getElementById('tab-notes').innerHTML='<div id="notes-inner"></div>';
+    renderTimetableTab(batchData);
+    document.getElementById('batch-tabs').style.display='flex';
+    document.getElementById('batch-tab-content').style.display='block';
+    switchTab('overview',document.querySelector('.tab-btn'));
+  }catch(e){
+    document.getElementById('batch-hero-inner').innerHTML=`<div class="error-state" style="padding:36px 0;">
+      <svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="var(--cx-3)" stroke-width="1.5">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/>
+      </svg>
+      <p>${esc(e.message)}</p>
+    </div>`;
+  }
+}
+
+function renderBatchHero(b,id){
+  const enrolled=getEnrolled().includes(id);
+  const disc=b.price&&b.price>b.discountPrice?Math.round((1-b.discountPrice/b.price)*100):0;
+  const img=b.banner||'https://placehold.co/540x304/0d0d1f/00f5d4?text=SW';
+  document.getElementById('batch-hdr-title').textContent=b.title;
+  document.getElementById('batch-hero-inner').innerHTML=`
+    <img class="batch-hero-img" src="${esc(img)}" alt="${esc(b.title)}"
+      onerror="this.src='https://placehold.co/540x304/0d0d1f/00f5d4?text=SW'"/>
+    <h1 class="batch-hero-title">${esc(b.title)}</h1>
+    <div class="batch-hero-price">
+      <span class="batch-price-big">₹${b.discountPrice}</span>
+      ${b.price&&b.price>b.discountPrice?`<span class="batch-price-orig">₹${b.price}</span><span class="badge bdg-green">${disc}% off</span>`:''}
+    </div>
+    <div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap;">
+      ${b.isLive?'<span class="badge bdg-live"><span class="dot"></span>Live Course</span>':''}
+      ${b.isRecorded?'<span class="badge bdg-recorded">📹 Recorded</span>':''}
+      ${b.validity?`<span class="badge bdg-purple">⏳ ${esc(b.validity)}</span>`:''}
+      ${enrolled?'<span class="badge bdg-enrolled">✓ Enrolled</span>':''}
+    </div>
+    <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;">
+      ${enrolled
+        ?`<button class="btn btn-danger" style="flex:unset;padding:10px 20px;" onclick="unenrollBatch('${currentBatchId}')">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            Unenroll</button>`
+        :`<button class="btn btn-cx" style="flex:unset;padding:10px 24px;" onclick="enrollBatch('${currentBatchId}')">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+            Enroll Now</button>`}
+    </div>`;
+}
+
+function enrollBatch(id){saveEnrolled([...getEnrolled(),id]);renderBatchHero(batchData,id);updateStats();showToast('🎉 Enrolled!','success');}
+function unenrollBatch(id){saveEnrolled(getEnrolled().filter(x=>x!==id));renderBatchHero(batchData,id);updateStats();showToast('Unenrolled','error');}
+
+// ── OVERVIEW TAB ──
+function renderBatchOverview(b){
+  let h='<div style="animation:fadeUp 0.3s ease;">';
+  if(b.description?.length>0){
+    h+=`<div class="ov-section"><div class="ov-h"><div class="ov-h-icon"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="var(--cx-1)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></div>Course Description</div>
+    <ul class="ov-list">${b.description.map(d=>`<li><div class="li-dot"><svg width="9" height="9" fill="none" viewBox="0 0 24 24" stroke="var(--cx-1)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>${esc(d)}</li>`).join('')}</ul></div>`;
+  }
+  if(b.courseHighlights?.length>0){
+    h+=`<div class="ov-section"><div class="ov-h"><div class="ov-h-icon"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="var(--cx-1)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>Highlights</div>
+    <ul class="ov-list">${b.courseHighlights.map(h2=>`<li><div class="li-dot"><svg width="9" height="9" fill="none" viewBox="0 0 24 24" stroke="var(--cx-1)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>${esc(h2)}</li>`).join('')}</ul></div>`;
+  }
+  if(b.facultyDetails){
+    const f=b.facultyDetails;
+    h+=`<div class="ov-section"><div class="ov-h"><div class="ov-h-icon"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="var(--cx-1)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>Faculty</div>
+    <div class="faculty-card">
+      <img class="faculty-img" src="${esc(f.imageUrl||'')}" alt="${esc(f.name)}" onerror="this.src='https://placehold.co/68x68/0d0d1f/00f5d4?text=${esc(f.name?f.name[0]:'?')}'"/>
+      <div style="flex:1;">
+        <div class="faculty-name">${esc(f.name)}</div>
+        <div class="faculty-role">${esc(f.designation||'')}</div>
+        ${f.experience||f.reach?`<div class="faculty-badge">⚡ ${esc(f.experience||'')}${f.reach?' · '+esc(f.reach):''}</div>`:''}
+        ${f.bio?`<div class="faculty-bio">${esc(f.bio)}</div>`:''}
+      </div>
+    </div></div>`;
+  }
+  if(b.faqs?.length>0){
+    h+=`<div class="ov-section"><div class="ov-h"><div class="ov-h-icon"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="var(--cx-1)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg></div>FAQs</div>
+    ${b.faqs.map(f=>`<div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">${esc(f.question)}<svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button><div class="faq-a">${esc(f.answer)}</div></div>`).join('')}</div>`;
+  }
+  h+='</div>';
+  document.getElementById('tab-overview').innerHTML=h;
+}
+function toggleFaq(btn){btn.classList.toggle('open');btn.nextElementSibling.classList.toggle('open');}
+
+// ── VIDEOS TAB ──
+async function loadVideosTab(){
+  const el=document.getElementById('videos-inner');
+  if(videoTopicSelected){renderVideoTopic(videoTopicSelected);return;}
+  el.innerHTML='<div class="loader-wrap"><div class="cx-loader"></div></div>';
+  try{
+    const res=await fetch(`https://backend.multistreaming.site/api/courses/${currentBatchId}/classes?populate=full`);
+    const j=await res.json();
+    const topics=(j.state===200&&j.data?.classes)?j.data.classes:[];
+    const valid=topics.filter(t=>(t.classes||[]).length>0);
+    if(!valid.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">🎬</div><h3>No Videos Yet</h3><p>Coming soon.</p></div>';return;}
+    topicsCache.videos=valid;
+    el.innerHTML=valid.map((t,i)=>`
+      <div class="topic-card" onclick="selectVideoTopic(${i})">
+        <div class="topic-icon topic-icon-video">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="var(--cx-2)" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        </div>
+        <div class="topic-info"><div class="topic-name">${esc(t.topicName)}</div><div class="topic-sub">${(t.classes||[]).length} lecture${(t.classes||[]).length!==1?'s':''}</div></div>
+        <div class="topic-arrow"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div>
+      </div>`).join('');
+  }catch(e){el.innerHTML='<div class="error-state"><p>Failed to load videos</p></div>';}
+}
+
+function selectVideoTopic(i){
+  if(!topicsCache.videos)return;
+  videoTopicSelected=topicsCache.videos[i];
+  renderVideoTopic(videoTopicSelected);
+}
+
+function renderVideoTopic(topic){
+  document.getElementById('videos-inner').innerHTML=`
+    <button class="btn btn-ghost" style="margin-bottom:12px;" onclick="backToVideoTopics()">
+      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>Back
+    </button>
+    <div style="font-size:0.9rem;font-weight:800;color:var(--white);margin-bottom:14px;">${esc(topic.topicName)}</div>
+    ${(topic.classes||[]).map(c=>renderClassCard(c)).join('')}`;
+}
+
+function backToVideoTopics(){videoTopicSelected=null;loadVideosTab();}
+
+function renderClassCard(cls){
+  const hasMulti=cls.mp4Recordings&&cls.mp4Recordings.length>1;
+  const hasSingle=cls.mp4Recordings&&cls.mp4Recordings.length===1;
+  return`
+  <div class="class-card">
+    <div class="class-card-head">
+      <div class="class-icon">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="var(--cx-1)" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div class="class-title">${esc(cls.title)}</div>
+        ${cls.teacherName?`<div class="class-teacher">${esc(cls.teacherName)}</div>`:''}
+        <div class="class-time">
+          <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          ${new Date(cls.startDate).toLocaleDateString('en-IN',{day:'numeric',month:'short'})}
+        </div>
+      </div>
+    </div>
+    ${hasMulti||hasSingle?`<div style="padding:12px 16px;">
+      ${hasMulti
+        ?`<div style="display:flex;flex-wrap:wrap;gap:6px;">${cls.mp4Recordings.map(r=>`<button class="btn btn-cx btn-sm" onclick="openLink('${esc(r.url)}')">▶ ${esc(r.quality)}</button>`).join('')}</div>`
+        :`<button class="btn btn-cx" style="width:100%;" onclick="openLink('${esc(cls.mp4Recordings[0].url)}')">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Watch Recording</button>`}
+    </div>`:''}
+  </div>`;
+}
+
+// ── NOTES TAB ──
+async function loadNotesTab(){
+  const el=document.getElementById('notes-inner');
+  if(notesTopicSelected){renderNotesTopic(notesTopicSelected);return;}
+  el.innerHTML='<div class="loader-wrap"><div class="cx-loader"></div></div>';
+  try{
+    const res=await fetch(`https://backend.multistreaming.site/api/courses/${currentBatchId}/notes`);
+    const j=await res.json();
+    const topics=(j.state===200&&j.data)?j.data:[];
+    const valid=topics.filter(t=>(t.pdfs||[]).length>0);
+    if(!valid.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">📄</div><h3>No Notes Yet</h3><p>Notes coming soon.</p></div>';return;}
+    topicsCache.notes=valid;
+    el.innerHTML=valid.map((t,i)=>`
+      <div class="topic-card" onclick="selectNotesTopic(${i})">
+        <div class="topic-icon topic-icon-notes">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="var(--cx-1)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div class="topic-info"><div class="topic-name">${esc(t.topicName)}</div><div class="topic-sub">${(t.pdfs||[]).length} PDF${(t.pdfs||[]).length!==1?'s':''}</div></div>
+        <div class="topic-arrow"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div>
+      </div>`).join('');
+  }catch(e){el.innerHTML='<div class="error-state"><p>Failed to load notes</p></div>';}
+}
+
+function selectNotesTopic(i){
+  if(!topicsCache.notes)return;
+  notesTopicSelected=topicsCache.notes[i];
+  renderNotesTopic(notesTopicSelected);
+}
+
+function renderNotesTopic(topic){
+  document.getElementById('notes-inner').innerHTML=`
+    <button class="btn btn-ghost" style="margin-bottom:12px;" onclick="backToNotesTopics()">
+      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>Back
+    </button>
+    <div style="font-size:0.9rem;font-weight:800;color:var(--white);margin-bottom:14px;">${esc(topic.topicName)}</div>
+    ${(topic.pdfs||[]).map(pdf=>`
+      <div class="pdf-row">
+        <div class="pdf-row-info">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--cx-4)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <div>
+            <div class="pdf-row-name">${esc(pdf.title)}</div>
+            ${pdf.teacherName?`<div style="font-size:0.67rem;color:var(--muted);">By ${esc(pdf.teacherName)}</div>`:''}
+          </div>
+        </div>
+        <button class="btn btn-cx btn-sm" onclick="openLink('${esc(pdf.uploadPdf)}')">View</button>
+      </div>`).join('')}`;
+}
+function backToNotesTopics(){notesTopicSelected=null;loadNotesTab();}
+
+// ── TIMETABLE TAB ──
+async function renderTimetableTab(b){
+  const el=document.getElementById('tab-timetable');
+  el.innerHTML='<div class="loader-wrap"><div class="cx-loader"></div></div>';
+  let liveHtml=`<div style="text-align:center;padding:24px 0;">
+    <div style="font-size:2rem;opacity:0.3;margin-bottom:8px;">📡</div>
+    <p style="font-size:0.82rem;color:var(--muted);">No classes scheduled today.</p></div>`;
+  try{
+    const res=await fetch(`https://gdgoenkaratia.com/api/courses/${currentBatchId}/todays-classes`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Origin':'https://www.selectionway.com'},
+      body:JSON.stringify({}),cache:'no-store'
+    });
+    if(res.ok){
+      const j=await res.json();
+      const classes=j?.data?.classes||[];
+      if(classes.length>0){
+        const sorted=[...classes].sort((a,b)=>{const o={LIVE:0,Upcoming:1,Completed:2};return(o[getLiveStatus(a)]??2)-(o[getLiveStatus(b)]??2);});
+        liveHtml=sorted.map(c=>renderLiveCard(c)).join('');
+      }
+    }
+  }catch(e){}
+
+  const tt=(b.timeTable||[]);
+  const ttHtml=tt.length>0
+    ?tt.map(t=>`<div class="tt-row"><span class="tt-topic">${esc(t.topic)}</span><span class="tt-time">${esc(t.time)}</span></div>`).join('')
+    :`<div style="text-align:center;padding:24px 0;"><p style="font-size:0.82rem;color:var(--muted);">Timetable coming soon.</p></div>`;
+
+  el.innerHTML=`
+    <div class="ov-section">
+      <div class="ov-h"><div class="ov-h-icon"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="var(--cx-3)" stroke-width="2"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.95C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.95A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.57 2.78 2.78 0 0 0 1.95 1.95C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg></div>Today's Classes</div>
+      ${liveHtml}
+    </div>
+    <div class="ov-section">
+      <div class="ov-h"><div class="ov-h-icon"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="var(--cx-1)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>Weekly Schedule</div>
+      ${ttHtml}
+    </div>`;
+}
+
+function getLiveStatus(cls){
+  if(cls.isLive&&cls.streamStatus!=='ended')return'LIVE';
+  if(cls.streamStatus==='ended')return'Completed';
+  if(cls.startDate&&new Date(cls.startDate)>new Date())return'Upcoming';
+  return'Completed';
+}
+
+function renderLiveCard(cls){
+  const status=getLiveStatus(cls);
+  const hasRec=cls.mp4Recordings?.length>0;
+  const badge=status==='LIVE'
+    ?'<span class="badge bdg-live"><span class="dot"></span>LIVE</span>'
+    :status==='Upcoming'?'<span class="badge bdg-upcoming">Upcoming</span>'
+    :'<span class="badge bdg-completed">Done</span>';
+
+  let action='';
+  if(status==='LIVE'&&cls.class_link){
+    action=`<button class="btn btn-live" style="width:100%;margin-top:10px;" onclick="openLink('${esc(cls.class_link)}')">
+      <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49M7.76 16.24a6 6 0 0 1 0-8.49"/></svg>Join Live</button>`;
+  }else if(status==='Completed'&&hasRec){
+    if(cls.mp4Recordings.length>1){
+      action='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;">'+
+        cls.mp4Recordings.map(r=>`<button class="btn btn-cx btn-sm" onclick="openLink('${esc(r.url)}')">▶ ${esc(r.quality)}</button>`).join('')+'</div>';
+    }else{
+      action=`<button class="btn btn-cx" style="width:100%;margin-top:10px;" onclick="openLink('${esc(cls.mp4Recordings[0].url)}')">
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>Watch Recording</button>`;
+    }
+  }else if(status==='Upcoming'){
+    action=`<button class="btn btn-disabled" style="width:100%;margin-top:10px;" disabled>⏳ Upcoming</button>`;
+  }
+
+  return`
+  <div class="live-class-card">
+    <div class="live-class-head">
+      <div class="class-icon">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="var(--cx-2)" stroke-width="2"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.95C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.95A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.57 2.78 2.78 0 0 0 1.95 1.95C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div class="class-title">${esc(cls.title)}</div>
+        <div class="class-time">
+          <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          ${new Date(cls.startDate).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}
+          ${cls.endDate?` – ${new Date(cls.endDate).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}`:''}
+        </div>
+      </div>
+      ${badge}
+    </div>
+    ${action?`<div style="padding:10px 16px;">${action}</div>`:''}
+  </div>`;
+}
+
+// ── TAB SWITCH ──
+function switchTab(name,btn){
+  document.querySelectorAll('#batch-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  const panel=document.getElementById('tab-'+name);
+  if(panel)panel.classList.add('active');
+  if(name==='videos')loadVideosTab();
+  if(name==='notes')loadNotesTab();
+}
+
+// ── QUALITY MODAL ──
+function showQualityPicker(recs){
+  currentQualityList=recs;
+  document.getElementById('quality-options').innerHTML=recs.map(r=>`
+    <button class="quality-btn" onclick="pickQuality('${esc(r.url)}')">
+      <span>${esc(r.quality)}</span><span class="quality-size">${r.size.toFixed(0)} MB</span>
+    </button>`).join('');
+  document.getElementById('quality-modal').classList.add('open');
+}
+function pickQuality(url){closeQualityModal();openLink(url);}
+function closeQualityModal(e){
+  if(e&&e.target!==document.getElementById('quality-modal'))return;
+  document.getElementById('quality-modal').classList.remove('open');
+}
+
+// ── HELPERS ──
+function openLink(url){if(url)window.open(url,'_blank','noopener,noreferrer');}
+function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
+
+// ── TOAST ──
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast');
+  if(!t)return;
+  t.textContent=msg;
+  t.style.background=type==='success'
+    ?'linear-gradient(135deg,var(--cx-1),var(--cx-2))'
+    :'linear-gradient(135deg,var(--cx-3),#c9184a)';
+  t.style.color=type==='success'?'#000':'#fff';
+  t.style.display='block';t.style.opacity='1';
+  clearTimeout(t._t);
+  t._t=setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.style.display='none',300);},2800);
+}
+</script>
+</body>
+</html>
